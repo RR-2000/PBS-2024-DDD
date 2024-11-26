@@ -11,6 +11,33 @@ void Gui::setSimulation(Simulation *sim) {
 	p_simulator->setSimulationSpeed(m_simSpeed);
 }
 
+void Gui::addParticlesToViewer() {
+	int n = m_pParticleData->getNumParticles();
+	Eigen::MatrixXd particlePositionsMat(n, 3);
+
+	uint initializedRows = 0;
+	for (auto particlePosition : m_pParticleData->getPositions()) {
+		for (uint i = 0; i < 3; i++) {
+			particlePositionsMat(initializedRows, i) = particlePosition(i);
+		}
+		initializedRows++;
+	}
+
+	Eigen::MatrixXd particleColorsMat = Eigen::MatrixXd::Ones(n, 3);
+	bool hasColor = OwnCustomAttribute<vector<Eigen::Vector3d>>::get(m_pParticleData)->hasAttribute("color");
+	if (hasColor) {
+		auto c = OwnCustomAttribute<vector<Eigen::Vector3d>>::get(m_pParticleData)->getAttribute("color");
+		uint initializedRows = 0;
+		for (auto particleColor : c) {
+			for (uint i = 0; i < 3; i++) {
+				particleColorsMat(initializedRows, i) = particleColor(i);
+			}
+			initializedRows++;
+		}
+	}
+
+	m_viewer.data_list[0].add_points(particlePositionsMat, particleColorsMat);
+}
 
 void Gui::start() {
 	// message: http://patorjk.com/software/taag/#p=display&v=0&f=Roman&t=PBS%2019
@@ -18,15 +45,15 @@ void Gui::start() {
 		R"(
           ooooooooo.   oooooooooo.   .oooooo..o
           `888   `Y88. `888'   `Y8b d8P'    `Y8
-           888   .d88'  888     888 Y88bo.     
-           888ooo88P'   888oooo888'  `"Y8888o. 
+           888   .d88'  888     888 Y88bo.
+           888ooo88P'   888oooo888'  `"Y8888o.
            888          888    `88b      `"Y88b
            888          888    .88P oo     .d8P
           o888o        o888bood8P'  8""88888P'
 
   252-0546-00L Physically-Based Simulation in Computer Graphics @ ETH Zurich
   Course Exercise Framework
-  
+
   Shortcuts:
   [drag] Rotate scene                 |  [space] Start/pause simulation
   I,i    Toggle invert normals        |  A,a     Single step
@@ -40,13 +67,12 @@ void Gui::start() {
 
 	// setting up viewer
 	m_viewer.data().show_lines = false;
-	m_viewer.data().point_size = 5.0f;
-	m_viewer.core.background_color.setOnes();
-    m_viewer.data().set_face_based(true);
-    m_viewer.data().shininess = 1.0;
+	m_viewer.data().point_size = 2.0f;
 	m_viewer.core.is_animating = true;
 	m_viewer.core.camera_zoom = 0.1;
 	m_viewer.core.object_scale = 1.0;
+	m_viewer.core.background_color << 0.5f, 0.5f, 0.5f, 1.0f;
+
 
 	// setting up menu
 	igl::opengl::glfw::imgui::ImGuiMenu menu;
@@ -71,10 +97,10 @@ void Gui::start() {
 		return scrollCallback(viewer, delta_y);
 	};
 
-	m_viewer.callback_mouse_down = [&](igl::opengl::glfw::Viewer &viewer,
+/* 	m_viewer.callback_mouse_down = [&](igl::opengl::glfw::Viewer &viewer,
 		int button, int modifier) {
 		return mouseCallback(viewer, menu, button, modifier);
-	};
+	}; */
 
 	// start viewer
 	m_viewer.launch();
@@ -169,7 +195,9 @@ bool Gui::drawCallback(igl::opengl::glfw::Viewer &viewer) {
 
 	p_simulator->render(viewer);
 
-	
+	//if(m_pParticleData)
+	//	addParticlesToViewer();
+
 	return false;
 }
 
@@ -230,7 +258,7 @@ bool Gui::keyCallback(igl::opengl::glfw::Viewer &viewer, unsigned int key,
 		return true;
 	case ';':
 		for (auto &d : viewer.data_list) {
-			d.show_vertid = !d.show_vertid;
+		    d.show_vertid = !d.show_vertid;
 		}
 		return true;
 	case ':':
@@ -306,13 +334,13 @@ bool Gui::mouseCallback(igl::opengl::glfw::Viewer &viewer,
 }
 
 void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
-	glfwSetWindowTitle(m_viewer.window, "PBS Exercises");
+	glfwSetWindowTitle(m_viewer.window, "Cocktail Simulation");
 
 	float menu_width = 220.f * menu.menu_scaling();
 
 	// Controls
-	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSizeConstraints(ImVec2(menu_width, -1.0f),
 		ImVec2(menu_width, -1.0f));
 	bool _viewer_menu_visible = true;
@@ -326,9 +354,9 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
 
 	// Clicking
 	if (m_clickedVertex >= 0) {
-		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize,
-			ImGuiSetCond_FirstUseEver);
+                                 ImGuiCond_FirstUseEver);
 		bool visible = true;
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
@@ -369,8 +397,8 @@ void Gui::drawMenuWindow(igl::opengl::glfw::imgui::ImGuiMenu &menu) {
 		int width, height;
 		glfwGetWindowSize(m_viewer.window, &width, &height);
 		ImGui::SetNextWindowPos(ImVec2(width - menu_width, 0.0f),
-			ImGuiSetCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiSetCond_FirstUseEver);
+			ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowSizeConstraints(ImVec2(menu_width, -1.0f),
 			ImVec2(menu_width, -1.0f));
 		ImGui::Begin("Stats", &_viewer_menu_visible,
@@ -452,25 +480,23 @@ bool Gui::drawMenu(igl::opengl::glfw::Viewer &viewer,
 			p_simulator->setMaxSteps(m_maxSteps);
 		}
 	}
-	if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_DefaultOpen)) {
-		if (ImGui::Checkbox("Wireframe", &(viewer.data().show_lines))) {
+	if (ImGui::CollapsingHeader("Overlays", ImGuiTreeNodeFlags_None)) {
+		if (ImGui::Checkbox("Wireframe", (bool*)&(viewer.data().show_lines))) {
 			for (size_t i = 0; i < viewer.data_list.size(); i++) {
 				viewer.data_list[i].show_lines = viewer.data().show_lines;
 			}
 		}
-		if (ImGui::Checkbox("Fill", &(viewer.data().show_faces))) {
+		if (ImGui::Checkbox("Fill", (bool*)&(viewer.data().show_faces))) {
 			for (size_t i = 0; i < viewer.data_list.size(); i++) {
 				viewer.data_list[i].show_faces = viewer.data().show_faces;
 			}
 		}
-		if (ImGui::Checkbox("Show vertex labels",
-			&(viewer.data().show_vertid))) {
+		if (ImGui::Checkbox("Show vertex labels", (bool*)&(viewer.data().show_vertid))) {
 			for (size_t i = 0; i < viewer.data_list.size(); i++) {
 				viewer.data_list[i].show_vertid = viewer.data().show_vertid;
 			}
 		}
-		if (ImGui::Checkbox("Show faces labels",
-			&(viewer.data().show_faceid))) {
+		if (ImGui::Checkbox("Show faces labels", (bool*)&(viewer.data().show_faceid))) {
 			for (size_t i = 0; i < viewer.data_list.size(); i++) {
 				viewer.data_list[i].show_faceid = viewer.data().show_faceid;
 			}

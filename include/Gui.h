@@ -6,13 +6,14 @@
 #include "Arrow.h"
 #include "ReferencePlane.h"
 #include "Simulator.h"
+#include "ParticlesData.h"
 /*
  * Base class to open a window with a simple GUI for simulation. Inherit from
  * this class to perform a simulation and customize the menu.
  */
 class Gui {
 public:
-	Gui() {
+	Gui() : m_pParticleData(nullptr) {
 	
 	}
 
@@ -22,6 +23,13 @@ public:
 	 * Set simulation to be performed in the simulator.
 	 */
 	void setSimulation(Simulation *sim);
+
+	/*
+	* Set particle system to be rendered
+	*/
+	inline void setParticleSystem(shared_ptr<ParticlesData> pParticleData) {
+		m_pParticleData = pParticleData;
+	}
 
 	/*
 	 * Initialize all the necessary data structures and callbacks and open the
@@ -88,6 +96,7 @@ public:
 	void turnOffLight() { m_viewer.core.lighting_factor = 0; }
 	void orthoCam() { m_viewer.core.orthographic = true; }
 
+
 protected:
 	void drawArrow(const Arrow &arrow);
 
@@ -142,7 +151,7 @@ protected:
 
 	Simulator *p_simulator = NULL;
 	bool m_request_clear = false;
-	int m_simSpeed = 60;
+	int m_simSpeed = 800;
 	int m_maxSimSpeed = 1000;
 	bool m_fastForward = false;
 
@@ -166,6 +175,8 @@ protected:
 
 	int m_numRecords = 100;  // number of records to keep
 
+	/* Particle System */
+	shared_ptr<ParticlesData> m_pParticleData;
 };
 
-#endif
+#endif // GUI_H
