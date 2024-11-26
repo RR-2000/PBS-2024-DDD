@@ -69,7 +69,7 @@ public:
         m_liquid_source_velocity = Eigen::Vector3d(0.0, -1.0, 0.0); // Downward pouring velocity
 
 		// Add glass boundary (as static particles)
-		m_boundary_particles_path = "../data/cocktail_glass.xyz";  // Precomputed glass particles
+		m_boundary_particles_path = "../../data/cocktail_glass.xyz";  // Precomputed glass particles
 		simulation->m_sources.push_back(new CustomSource(fluids::boundary, m_boundary_particles_path));
 		simulation->m_sources.back()->init();
 
