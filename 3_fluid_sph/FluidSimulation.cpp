@@ -32,20 +32,32 @@ void FluidSimulation::resetMembers() {
 }
 
 bool FluidSimulation::advance() {
-    m_time += m_dt;
-    for (auto &source : m_sources) {
-        source->advance(m_time);
+    // Check if m_dt is zero (which would prevent time from advancing)
+    if (m_dt == 0) {
+        return false;  // If m_dt is zero, return false to prevent advancing
     }
+
+    // Increment the simulation time by the timestep
+    m_time += m_dt;
+
+
+    // Update all sources (like emitters)
+    for (auto &source : m_sources) {
+        source->advance(m_time);  // Update each source
+    }
+
     m_step++;
 
-    // save mesh
-    if(m_save_simulation && (m_step % m_save_freq == 0)) {
+    // Save the simulation data (if required)
+    if (m_save_simulation && (m_step % m_save_freq == 0)) {
         exportMesh();
         exportParticles();
     }
 
+    // Return false to indicate that the simulation should continue (not finished)
     return false;
 }
+
 
 void FluidSimulation::updateRenderGeometry() {
     int numParticles = 0;

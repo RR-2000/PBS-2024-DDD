@@ -10,6 +10,7 @@
  */
 class Simulation {
 public:
+
 	Simulation() {}
 
 	virtual ~Simulation() {}
@@ -63,6 +64,8 @@ public:
 
 	std::vector<RigidObject> &getObjects() { return m_objects; }
 
+    double m_dt = 0.0;         // length of timestep
+
 protected:
 	/*
 	 * Reset class variables specific to a certain simulation. Is called by
@@ -72,7 +75,6 @@ protected:
 
 	std::vector<RigidObject>
 		m_objects;             // vector of all objects in the simulation
-	double m_dt = 0.0;         // length of timestep
 	double m_time = 0.0;       // current time
 	unsigned long m_step = 0;  // number of performed steps in simulation
 };

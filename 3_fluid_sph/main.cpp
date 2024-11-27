@@ -65,7 +65,7 @@ public:
         m_duck_velocity = Eigen::Vector3d(0.0, 0.0, 0.0); // Default velocity
 
         // Liquid source setup
-        m_liquid_source_position = Eigen::Vector3d(0.0, 3.0, 0.0); // Position above the glass
+        m_liquid_source_position = Eigen::Vector3d(0.0, 1.0, 0.0); // Position above the glass
         m_liquid_source_velocity = Eigen::Vector3d(0.0, -1.0, 0.0); // Downward pouring velocity
 
 		// Add glass boundary (as static particles)
@@ -74,11 +74,10 @@ public:
 		simulation->m_sources.back()->init();
 
 		// Add liquid source (pouring water)
-		simulation->m_sources.push_back(new EmittingSource(fluids::water, 
-			Eigen::Vector3d(0, 3, 0),  // Position above the glass
-			Eigen::Vector3d(0, -1, 0) // Velocity (downward)
-		));
-		simulation->m_sources.back()->init();
+		// Change spacing between particles to 0.2
+		simulation->m_sources.push_back(new BlockSource(fluids::water, Eigen::Vector3i(7, 7, 7), Eigen::Vector3d(-0.3, 3, -0.1)));
+        simulation->m_sources.back()->init();
+
 
 		std::cout << "Liquid source added at position: "
           << m_liquid_source_position.transpose()

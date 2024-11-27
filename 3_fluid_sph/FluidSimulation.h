@@ -1,7 +1,7 @@
 #ifndef PBS_PARTICLE_SIMULATION_H
 #define PBS_PARTICLE_SIMULATION_H
 
-#include "Simulation.h"
+#include "../include/Simulation.h"
 #include "Particle.h"
 #include "Scene.h"
 #include "Fluid.h"

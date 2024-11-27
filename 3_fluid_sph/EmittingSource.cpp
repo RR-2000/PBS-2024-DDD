@@ -21,6 +21,8 @@ void EmittingSource::init() {
 
 bool EmittingSource::advance(double t) {
 
+    std::cout << "advance() called with t = " << t << std::endl;  
+
     if (m_maxParticles >= 0 && m_particleCount >= m_maxParticles) {
         return false;
     }
@@ -38,6 +40,8 @@ bool EmittingSource::advance(double t) {
             for(int y = 0; y < m_y; y++) {
                 for(int z = 0; z < m_z; z++) {
                     particle.m_pos = m_position + Eigen::Vector3d(x*m_spacing, y*m_spacing, z*m_spacing);
+                    //std::cout << "Emitting particle at position: " << particle.m_pos.transpose() << std::endl;
+
                     m_fluid->m_particles.push_back(particle);
                     ++m_particleCount;
                 }

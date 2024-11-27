@@ -21,7 +21,7 @@ public:
 	double m_gridWidth; // Width of a cell in the uniform grid, ideally equal to kernel Radius
 	double m_boundary_repulsion;
 
-	double m_dt = 0.0;
+	// double m_dt;
 
 protected:
 

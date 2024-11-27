@@ -5,6 +5,7 @@
 
 SphSimulation::SphSimulation() : FluidSimulation() {
     m_dt = 0.01;
+    std::cout << "SphSimulation Constructor: m_dt = " << m_dt << std::endl;
     m_gridWidth = 0.2;
     m_kernelRadius = 0.2;
     m_neighborSearch = new UniformGridNeighborSearch(m_gridWidth);
